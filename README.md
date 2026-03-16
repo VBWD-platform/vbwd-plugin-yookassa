@@ -43,3 +43,13 @@ No plugin-owned tables.
 ```bash
 docker compose run --rm test python -m pytest plugins/yookassa/tests/ -v
 ```
+
+---
+
+## Related
+
+| | Repository |
+|-|------------|
+| 👤 Frontend (user) | [vbwd-fe-user-plugin-yookassa-payment](https://github.com/VBWD-platform/vbwd-fe-user-plugin-yookassa-payment) |
+
+**Core:** [vbwd-backend](https://github.com/VBWD-platform/vbwd-backend)
