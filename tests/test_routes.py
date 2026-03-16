@@ -96,7 +96,9 @@ class TestCreateSession:
         )
         assert resp.status_code == 404
 
-    def test_create_session_missing_invoice_id(self, client, auth_headers, mock_container):
+    def test_create_session_missing_invoice_id(
+        self, client, auth_headers, mock_container
+    ):
         """Should return 400 when invoice_id is missing."""
         mock_container.invoice_repository.return_value.find_by_id.return_value = None
         resp = client.post(
@@ -106,7 +108,9 @@ class TestCreateSession:
         )
         assert resp.status_code == 400
 
-    def test_create_session_invoice_not_found(self, client, auth_headers, mock_container):
+    def test_create_session_invoice_not_found(
+        self, client, auth_headers, mock_container
+    ):
         """Should return 404 when invoice does not exist."""
         mock_container.invoice_repository.return_value.find_by_id.return_value = None
         resp = client.post(
@@ -116,7 +120,9 @@ class TestCreateSession:
         )
         assert resp.status_code == 404
 
-    def test_create_session_invoice_not_pending(self, client, auth_headers, mock_container):
+    def test_create_session_invoice_not_pending(
+        self, client, auth_headers, mock_container
+    ):
         """Should return 400 when invoice status is not pending."""
         invoice = MagicMock()
         invoice.id = uuid4()
@@ -262,9 +268,7 @@ class TestWebhook:
         )
         assert resp.status_code == 404
 
-    def test_webhook_payment_succeeded(
-        self, client, mock_container, yookassa_config
-    ):
+    def test_webhook_payment_succeeded(self, client, mock_container, yookassa_config):
         """Should return 200 and emit event for payment.succeeded."""
         invoice_id = str(uuid4())
         event_payload = {
@@ -281,7 +285,9 @@ class TestWebhook:
         mock_invoice.id = UUID(invoice_id)
         mock_invoice.status.value = "PENDING"
         mock_invoice.line_items = []
-        mock_container.invoice_repository.return_value.find_by_id.return_value = mock_invoice
+        mock_container.invoice_repository.return_value.find_by_id.return_value = (
+            mock_invoice
+        )
 
         resp = self._make_signed_webhook(client, event_payload, yookassa_config)
         assert resp.status_code == 200

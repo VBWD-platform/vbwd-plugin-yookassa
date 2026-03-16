@@ -27,9 +27,7 @@ class TestYooKassaRenewalService:
         )
 
         mock_yookassa = mocker.MagicMock()
-        mocker.patch.dict(
-            __import__("sys").modules, {"yookassa": mock_yookassa}
-        )
+        mocker.patch.dict(__import__("sys").modules, {"yookassa": mock_yookassa})
 
         sub = self._make_subscription("pm_test_123")
         inv = self._make_invoice(Decimal("19.99"), "RUB")
@@ -57,9 +55,7 @@ class TestYooKassaRenewalService:
         )
 
         mock_yookassa = mocker.MagicMock()
-        mocker.patch.dict(
-            __import__("sys").modules, {"yookassa": mock_yookassa}
-        )
+        mocker.patch.dict(__import__("sys").modules, {"yookassa": mock_yookassa})
 
         sub = self._make_subscription("pm_idem_key")
         inv = self._make_invoice()
@@ -68,7 +64,11 @@ class TestYooKassaRenewalService:
         svc.charge_saved_method(sub, inv)
 
         call_args = mock_yookassa.Payment.create.call_args
-        idempotency_key = call_args[0][1] if len(call_args[0]) > 1 else call_args[1].get("idempotency_key") or call_args[0][1]
+        idempotency_key = (
+            call_args[0][1]
+            if len(call_args[0]) > 1
+            else call_args[1].get("idempotency_key") or call_args[0][1]
+        )
         assert str(inv.id) == idempotency_key
 
     def test_charge_saved_method_uses_correct_amount(self, mocker):
@@ -77,9 +77,7 @@ class TestYooKassaRenewalService:
         )
 
         mock_yookassa = mocker.MagicMock()
-        mocker.patch.dict(
-            __import__("sys").modules, {"yookassa": mock_yookassa}
-        )
+        mocker.patch.dict(__import__("sys").modules, {"yookassa": mock_yookassa})
 
         sub = self._make_subscription("pm_amt_test")
         inv = self._make_invoice(Decimal("49.99"), "EUR")

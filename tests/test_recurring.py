@@ -45,6 +45,7 @@ def app(mock_yookassa_api, mock_config_store, mock_container, mocker):
     mocker.patch("src.middleware.auth.db", MagicMock())
 
     from plugins.yookassa.routes import yookassa_plugin_bp
+
     flask_app.register_blueprint(
         yookassa_plugin_bp, url_prefix="/api/v1/plugins/yookassa"
     )
@@ -220,9 +221,7 @@ class TestRecurringPaymentEmitsEvent:
 class TestPaymentCanceledWebhook:
     """Test payment.canceled webhook handling."""
 
-    def test_webhook_payment_canceled(
-        self, client, mock_container, yookassa_config
-    ):
+    def test_webhook_payment_canceled(self, client, mock_container, yookassa_config):
         """Should return 200 for payment.canceled (warning logged, no event)."""
         invoice_id = str(uuid4())
 
@@ -246,9 +245,7 @@ class TestPaymentCanceledWebhook:
 class TestRefundSucceededWebhook:
     """Test refund.succeeded webhook handling."""
 
-    def test_webhook_refund_succeeded(
-        self, client, mock_container, yookassa_config
-    ):
+    def test_webhook_refund_succeeded(self, client, mock_container, yookassa_config):
         """Should return 200 for refund.succeeded (logged, no domain event)."""
         event_payload = {
             "event": "refund.succeeded",

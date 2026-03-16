@@ -33,6 +33,7 @@ def app(mock_yookassa_api, mock_config_store, mock_container, mocker):
     mocker.patch("src.middleware.auth.db", MagicMock())
 
     from plugins.yookassa.routes import yookassa_plugin_bp
+
     flask_app.register_blueprint(
         yookassa_plugin_bp, url_prefix="/api/v1/plugins/yookassa"
     )
@@ -96,9 +97,7 @@ class TestWebhookEventEmission:
         event = emit_call.call_args[0][0]
         assert isinstance(event, PaymentCapturedEvent)
 
-    def test_event_correct_invoice_id(
-        self, client, mock_container, yookassa_config
-    ):
+    def test_event_correct_invoice_id(self, client, mock_container, yookassa_config):
         """Emitted event should have correct invoice_id."""
         invoice_id = str(uuid4())
         mock_invoice = MagicMock()
@@ -125,9 +124,7 @@ class TestWebhookEventEmission:
         event = mock_container.event_dispatcher.return_value.emit.call_args[0][0]
         assert str(event.invoice_id) == invoice_id
 
-    def test_event_correct_amount(
-        self, client, mock_container, yookassa_config
-    ):
+    def test_event_correct_amount(self, client, mock_container, yookassa_config):
         """Emitted event should have correct amount."""
         invoice_id = str(uuid4())
         mock_invoice = MagicMock()
@@ -154,9 +151,7 @@ class TestWebhookEventEmission:
         event = mock_container.event_dispatcher.return_value.emit.call_args[0][0]
         assert event.amount == "999.95"
 
-    def test_event_correct_provider(
-        self, client, mock_container, yookassa_config
-    ):
+    def test_event_correct_provider(self, client, mock_container, yookassa_config):
         """Emitted event should have provider='yookassa'."""
         invoice_id = str(uuid4())
         mock_invoice = MagicMock()
@@ -254,6 +249,7 @@ class TestPaymentCanceled:
 
         mock_li = MagicMock()
         from src.models.enums import LineItemType
+
         mock_li.item_type = LineItemType.SUBSCRIPTION
         mock_li.item_id = sub_id
         mock_invoice.line_items = [mock_li]

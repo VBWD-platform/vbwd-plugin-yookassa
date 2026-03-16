@@ -96,7 +96,9 @@ class YooKassaSDKAdapter(BaseSDKAdapter):
                         "session_id": data["id"],
                         "session_url": confirmation.get("confirmation_url", ""),
                         "status": data.get("status", ""),
-                        "payment_method_id": data.get("payment_method", {}).get("id", ""),
+                        "payment_method_id": data.get("payment_method", {}).get(
+                            "id", ""
+                        ),
                     },
                 )
             return SDKResponse(
@@ -154,7 +156,9 @@ class YooKassaSDKAdapter(BaseSDKAdapter):
                     "currency": data.get("amount", {}).get("currency", "RUB"),
                     "invoice_id": data.get("metadata", {}).get("invoice_id", ""),
                     "payment_method_id": data.get("payment_method", {}).get("id", ""),
-                    "payment_method_saved": data.get("payment_method", {}).get("saved", False),
+                    "payment_method_saved": data.get("payment_method", {}).get(
+                        "saved", False
+                    ),
                 },
             )
         return SDKResponse(
@@ -205,6 +209,7 @@ class YooKassaSDKAdapter(BaseSDKAdapter):
         YooKassa signs the request body with the webhook secret.
         """
         import json
+
         expected = hmac.new(
             webhook_secret.encode(),
             payload,

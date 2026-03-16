@@ -3,7 +3,11 @@ from typing import Optional, Dict, Any, TYPE_CHECKING
 from decimal import Decimal
 from uuid import UUID
 from src.plugins.base import BasePlugin, PluginMetadata
-from src.plugins.payment_provider import PaymentProviderPlugin, PaymentResult, PaymentStatus
+from src.plugins.payment_provider import (
+    PaymentProviderPlugin,
+    PaymentResult,
+    PaymentStatus,
+)
 
 if TYPE_CHECKING:
     from flask import Blueprint
@@ -28,6 +32,7 @@ class YooKassaPlugin(PaymentProviderPlugin):
 
     def get_blueprint(self) -> Optional["Blueprint"]:
         from plugins.yookassa.routes import yookassa_plugin_bp
+
         return yookassa_plugin_bp
 
     def get_url_prefix(self) -> Optional[str]:
@@ -48,11 +53,14 @@ class YooKassaPlugin(PaymentProviderPlugin):
         config_store = current_app.config_store
         config = config_store.get_config("yookassa")
         prefix = "test_" if config.get("sandbox", True) else "live_"
-        return YooKassaSDKAdapter(SDKConfig(
-            api_key=config.get(f"{prefix}shop_id") or config.get("shop_id", ""),
-            api_secret=config.get(f"{prefix}secret_key") or config.get("secret_key", ""),
-            sandbox=config.get("sandbox", True),
-        ))
+        return YooKassaSDKAdapter(
+            SDKConfig(
+                api_key=config.get(f"{prefix}shop_id") or config.get("shop_id", ""),
+                api_secret=config.get(f"{prefix}secret_key")
+                or config.get("secret_key", ""),
+                sandbox=config.get("sandbox", True),
+            )
+        )
 
     def create_payment_intent(
         self,
@@ -75,7 +83,9 @@ class YooKassaPlugin(PaymentProviderPlugin):
             )
         return PaymentResult(success=False, error_message=resp.error)
 
-    def process_payment(self, payment_intent_id: str, payment_method: str) -> PaymentResult:
+    def process_payment(
+        self, payment_intent_id: str, payment_method: str
+    ) -> PaymentResult:
         adapter = self._get_adapter()
         resp = adapter.get_payment_status(payment_intent_id)
         if resp.success and resp.data.get("status") == "succeeded":
@@ -84,9 +94,13 @@ class YooKassaPlugin(PaymentProviderPlugin):
                 transaction_id=payment_intent_id,
                 status=PaymentStatus.COMPLETED,
             )
-        return PaymentResult(success=False, error_message=resp.error or "Payment not yet completed")
+        return PaymentResult(
+            success=False, error_message=resp.error or "Payment not yet completed"
+        )
 
-    def refund_payment(self, transaction_id: str, amount: Optional[Decimal] = None) -> PaymentResult:
+    def refund_payment(
+        self, transaction_id: str, amount: Optional[Decimal] = None
+    ) -> PaymentResult:
         adapter = self._get_adapter()
         resp = adapter.refund_payment(transaction_id, amount)
         if resp.success:
@@ -99,11 +113,15 @@ class YooKassaPlugin(PaymentProviderPlugin):
 
     def verify_webhook(self, payload: bytes, signature: str) -> bool:
         from flask import current_app
+
         config = current_app.config_store.get_config("yookassa")
         prefix = "test_" if config.get("sandbox", True) else "live_"
-        webhook_secret = config.get(f"{prefix}webhook_secret") or config.get("webhook_secret", "")
+        webhook_secret = config.get(f"{prefix}webhook_secret") or config.get(
+            "webhook_secret", ""
+        )
         try:
             from plugins.yookassa.sdk_adapter import YooKassaSDKAdapter
+
             YooKassaSDKAdapter.verify_webhook_signature_static(
                 payload, signature, webhook_secret
             )

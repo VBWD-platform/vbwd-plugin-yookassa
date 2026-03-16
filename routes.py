@@ -30,11 +30,14 @@ def _get_adapter(config):
     from plugins.yookassa.sdk_adapter import YooKassaSDKAdapter
 
     prefix = "test_" if config.get("sandbox", True) else "live_"
-    return YooKassaSDKAdapter(SDKConfig(
-        api_key=config.get(f"{prefix}shop_id") or config.get("shop_id", ""),
-        api_secret=config.get(f"{prefix}secret_key") or config.get("secret_key", ""),
-        sandbox=config.get("sandbox", True),
-    ))
+    return YooKassaSDKAdapter(
+        SDKConfig(
+            api_key=config.get(f"{prefix}shop_id") or config.get("shop_id", ""),
+            api_secret=config.get(f"{prefix}secret_key")
+            or config.get("secret_key", ""),
+            sandbox=config.get("sandbox", True),
+        )
+    )
 
 
 @yookassa_plugin_bp.route("/create-session", methods=["POST"])
@@ -92,10 +95,15 @@ def create_session():
 
         # Replace placeholder in success URL
         session_url = response.data.get("session_url", "")
-        return jsonify({
-            "session_id": yookassa_id,
-            "session_url": session_url,
-        }), 200
+        return (
+            jsonify(
+                {
+                    "session_id": yookassa_id,
+                    "session_url": session_url,
+                }
+            ),
+            200,
+        )
 
     return jsonify({"error": response.error}), 500
 
@@ -111,10 +119,13 @@ def yookassa_webhook():
     signature = request.headers.get("X-YooKassa-Signature", "")
 
     prefix = "test_" if config.get("sandbox", True) else "live_"
-    webhook_secret = config.get(f"{prefix}webhook_secret") or config.get("webhook_secret", "")
+    webhook_secret = config.get(f"{prefix}webhook_secret") or config.get(
+        "webhook_secret", ""
+    )
 
     try:
         from plugins.yookassa.sdk_adapter import YooKassaSDKAdapter
+
         event = YooKassaSDKAdapter.verify_webhook_signature_static(
             payload, signature, webhook_secret
         )
@@ -168,11 +179,16 @@ def session_status(payment_id):
         if invoice_id:
             _reconcile_payment(invoice_id, payment_id, response.data)
 
-    return jsonify({
-        "status": mapped_status,
-        "amount_total": response.data.get("amount_total"),
-        "currency": response.data.get("currency"),
-    }), 200
+    return (
+        jsonify(
+            {
+                "status": mapped_status,
+                "amount_total": response.data.get("amount_total"),
+                "currency": response.data.get("currency"),
+            }
+        ),
+        200,
+    )
 
 
 # ---- Webhook Handlers ----
