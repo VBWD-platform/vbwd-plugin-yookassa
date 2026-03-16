@@ -14,8 +14,6 @@ from src.plugins.payment_route_helpers import (
 )
 from src.sdk.interface import SDKConfig
 from src.models.enums import LineItemType, InvoiceStatus
-from src.models.invoice_line_item import InvoiceLineItem
-from src.models.invoice import UserInvoice
 from src.events.payment_events import (
     PaymentFailedEvent,
 )

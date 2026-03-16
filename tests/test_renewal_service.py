@@ -2,7 +2,7 @@
 import pytest
 from decimal import Decimal
 from uuid import uuid4
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock
 
 
 class TestYooKassaRenewalService:

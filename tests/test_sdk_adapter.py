@@ -1,10 +1,9 @@
 """Tests for YooKassaSDKAdapter."""
-import json
 import pytest
 from decimal import Decimal
 from unittest.mock import MagicMock
 
-from src.sdk.interface import SDKConfig, SDKResponse
+from src.sdk.interface import SDKConfig
 from src.sdk.base import BaseSDKAdapter
 
 
@@ -164,7 +163,7 @@ class TestYooKassaSDKAdapter:
         }
         mock_yookassa_api.post.return_value = payment_resp
 
-        result = adapter.create_payment_intent(
+        adapter.create_payment_intent(
             amount=Decimal("99.00"),
             currency="RUB",
             metadata={
