@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 from flask import Flask
 
-from src.models.enums import InvoiceStatus, LineItemType
+from src.models.enums import LineItemType
 from src.events.payment_events import PaymentCapturedEvent
 
 
