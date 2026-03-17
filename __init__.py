@@ -114,7 +114,7 @@ class YooKassaPlugin(PaymentProviderPlugin):
     def verify_webhook(self, payload: bytes, signature: str) -> bool:
         from flask import current_app
 
-        config = current_app.config_store.get_config("yookassa")
+        config = current_app.config_store.get_config("yookassa")  # type: ignore[attr-defined]
         prefix = "test_" if config.get("sandbox", True) else "live_"
         webhook_secret = config.get(f"{prefix}webhook_secret") or config.get(
             "webhook_secret", ""
