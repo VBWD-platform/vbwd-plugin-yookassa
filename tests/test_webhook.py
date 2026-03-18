@@ -8,7 +8,7 @@ from unittest.mock import MagicMock
 
 from flask import Flask
 
-from src.events.payment_events import PaymentCapturedEvent
+from vbwd.events.payment_events import PaymentCapturedEvent
 
 
 @pytest.fixture
@@ -27,9 +27,9 @@ def app(mock_yookassa_api, mock_config_store, mock_container, mocker):
     flask_app = Flask(__name__)
     flask_app.config["TESTING"] = True
 
-    mocker.patch("src.middleware.auth.AuthService", MagicMock())
-    mocker.patch("src.middleware.auth.UserRepository", MagicMock())
-    mocker.patch("src.middleware.auth.db", MagicMock())
+    mocker.patch("vbwd.middleware.auth.AuthService", MagicMock())
+    mocker.patch("vbwd.middleware.auth.UserRepository", MagicMock())
+    mocker.patch("vbwd.middleware.auth.db", MagicMock())
 
     from plugins.yookassa.routes import yookassa_plugin_bp
 
@@ -247,7 +247,7 @@ class TestPaymentCanceled:
         mock_invoice.status = MagicMock()
 
         mock_li = MagicMock()
-        from src.models.enums import LineItemType
+        from vbwd.models.enums import LineItemType
 
         mock_li.item_type = LineItemType.SUBSCRIPTION
         mock_li.item_id = sub_id
@@ -270,7 +270,7 @@ class TestPaymentCanceled:
         self, client, mock_container, yookassa_config
     ):
         """payment.canceled should mark invoice status as FAILED and call save."""
-        from src.models.enums import InvoiceStatus
+        from vbwd.models.enums import InvoiceStatus
 
         invoice_id = str(uuid4())
         sub_id = uuid4()
@@ -300,7 +300,7 @@ class TestPaymentCanceled:
         self, client, mock_container, yookassa_config
     ):
         """payment.canceled should emit PaymentFailedEvent with correct subscription_id."""
-        from src.events.payment_events import PaymentFailedEvent
+        from vbwd.events.payment_events import PaymentFailedEvent
 
         invoice_id = str(uuid4())
         sub_id = uuid4()

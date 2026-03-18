@@ -3,8 +3,8 @@ import pytest
 from flask import Blueprint
 
 from plugins.yookassa import YooKassaPlugin
-from src.plugins.base import BasePlugin
-from src.plugins.payment_provider import PaymentProviderPlugin
+from vbwd.plugins.base import BasePlugin
+from vbwd.plugins.payment_provider import PaymentProviderPlugin
 
 
 class TestYooKassaPluginMetadata:

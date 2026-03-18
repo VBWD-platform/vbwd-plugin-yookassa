@@ -7,8 +7,8 @@ from typing import Dict, Any, Optional
 
 import requests  # type: ignore[import-untyped]
 
-from src.sdk.base import BaseSDKAdapter
-from src.sdk.interface import SDKConfig, SDKResponse
+from vbwd.sdk.base import BaseSDKAdapter
+from vbwd.sdk.interface import SDKConfig, SDKResponse
 
 
 class YooKassaSDKAdapter(BaseSDKAdapter):

@@ -5,16 +5,16 @@ from uuid import UUID
 
 from flask import Blueprint, jsonify, request, current_app, g
 
-from src.middleware.auth import require_auth
-from src.plugins.payment_route_helpers import (
+from vbwd.middleware.auth import require_auth
+from vbwd.plugins.payment_route_helpers import (
     check_plugin_enabled,
     validate_invoice_for_payment,
     emit_payment_captured,
     determine_session_mode,
 )
-from src.sdk.interface import SDKConfig
-from src.models.enums import LineItemType, InvoiceStatus
-from src.events.payment_events import (
+from vbwd.sdk.interface import SDKConfig
+from vbwd.models.enums import LineItemType, InvoiceStatus
+from vbwd.events.payment_events import (
     PaymentFailedEvent,
 )
 

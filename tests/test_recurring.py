@@ -8,8 +8,8 @@ from unittest.mock import MagicMock
 
 from flask import Flask
 
-from src.models.enums import LineItemType
-from src.events.payment_events import PaymentCapturedEvent
+from vbwd.models.enums import LineItemType
+from vbwd.events.payment_events import PaymentCapturedEvent
 
 
 @pytest.fixture
@@ -32,15 +32,15 @@ def app(mock_yookassa_api, mock_config_store, mock_container, mocker):
     user_id = UUID("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
     mock_auth_service = MagicMock()
     mock_auth_service.return_value.verify_token.return_value = str(user_id)
-    mocker.patch("src.middleware.auth.AuthService", mock_auth_service)
+    mocker.patch("vbwd.middleware.auth.AuthService", mock_auth_service)
 
     mock_user = MagicMock()
     mock_user.id = user_id
     mock_user.status.value = "ACTIVE"
     mock_user_repo = MagicMock()
     mock_user_repo.return_value.find_by_id.return_value = mock_user
-    mocker.patch("src.middleware.auth.UserRepository", mock_user_repo)
-    mocker.patch("src.middleware.auth.db", MagicMock())
+    mocker.patch("vbwd.middleware.auth.UserRepository", mock_user_repo)
+    mocker.patch("vbwd.middleware.auth.db", MagicMock())
 
     from plugins.yookassa.routes import yookassa_plugin_bp
 
@@ -83,7 +83,7 @@ class TestDetermineSessionMode:
     def test_determine_mode_one_time(self, app):
         """Should return 'payment' for non-recurring invoice."""
         with app.app_context():
-            from src.plugins.payment_route_helpers import determine_session_mode
+            from vbwd.plugins.payment_route_helpers import determine_session_mode
 
             invoice = MagicMock()
             invoice.line_items = []
