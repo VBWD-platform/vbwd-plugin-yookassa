@@ -42,7 +42,7 @@ def app(mock_yookassa_api, mock_config_store, mock_container, mocker):
     mocker.patch("vbwd.middleware.auth.UserRepository", mock_user_repo)
     mocker.patch("vbwd.middleware.auth.db", MagicMock())
 
-    from plugins.yookassa.routes import yookassa_plugin_bp
+    from plugins.yookassa.yookassa.routes import yookassa_plugin_bp
 
     flask_app.register_blueprint(
         yookassa_plugin_bp, url_prefix="/api/v1/plugins/yookassa"

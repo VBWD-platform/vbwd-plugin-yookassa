@@ -10,7 +10,7 @@ from vbwd.sdk.base import BaseSDKAdapter
 @pytest.fixture
 def adapter(mock_yookassa_api):
     """Create YooKassaSDKAdapter with mocked requests module."""
-    from plugins.yookassa.sdk_adapter import YooKassaSDKAdapter
+    from plugins.yookassa.yookassa.sdk_adapter import YooKassaSDKAdapter
 
     config = SDKConfig(
         api_key="test_shop_123", api_secret="test_secret_456", sandbox=True

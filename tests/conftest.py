@@ -32,7 +32,7 @@ def mock_yookassa_api(mocker):
 
     Returns the mock so tests can configure specific responses.
     """
-    mock = mocker.patch("plugins.yookassa.sdk_adapter.requests")
+    mock = mocker.patch("plugins.yookassa.yookassa.sdk_adapter.requests")
     # Default: successful payment creation
     default_resp = mocker.MagicMock()
     default_resp.status_code = 200

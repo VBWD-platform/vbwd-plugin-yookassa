@@ -48,6 +48,7 @@ class YooKassaSDKAdapter(BaseSDKAdapter):
         currency: str,
         metadata: Dict[str, Any],
         idempotency_key: Optional[str] = None,
+        capture: bool = True,
     ) -> SDKResponse:
         """Create YooKassa payment for one-time or recurring payment.
 
@@ -66,7 +67,7 @@ class YooKassaSDKAdapter(BaseSDKAdapter):
                     "type": "redirect",
                     "return_url": metadata.get("success_url", ""),
                 },
-                "capture": True,
+                "capture": capture,
                 "metadata": {
                     "invoice_id": metadata.get("invoice_id", ""),
                     "user_id": metadata.get("user_id", ""),
@@ -108,9 +109,12 @@ class YooKassaSDKAdapter(BaseSDKAdapter):
         return self._with_idempotency(idempotency_key, _create)
 
     def capture_payment(
-        self, payment_intent_id: str, idempotency_key: Optional[str] = None
+        self,
+        payment_intent_id: str,
+        amount: Optional[Decimal] = None,
+        idempotency_key: Optional[str] = None,
     ) -> SDKResponse:
-        """Capture a two-step payment (not used with capture=True)."""
+        """Capture a two-step payment."""
         idem_key = idempotency_key or str(uuid_mod.uuid4())
 
         def _capture():
@@ -137,6 +141,26 @@ class YooKassaSDKAdapter(BaseSDKAdapter):
             )
 
         return self._with_idempotency(idempotency_key, _capture)
+
+    def release_authorization(self, payment_id: str) -> SDKResponse:
+        """Cancel/void a previously authorized YooKassa payment."""
+        idem_key = str(uuid_mod.uuid4())
+        resp = requests.post(
+            f"{self.BASE_URL}/payments/{payment_id}/cancel",
+            json={},
+            auth=self._auth(),
+            headers=self._headers(idem_key),
+            timeout=self._config.timeout,
+        )
+        if resp.status_code in (200, 201):
+            data = resp.json()
+            return SDKResponse(
+                success=True,
+                data={"payment_id": data["id"], "status": data.get("status", "")},
+            )
+        return SDKResponse(
+            success=False, error=resp.text, error_code=str(resp.status_code)
+        )
 
     def get_payment_status(self, payment_id: str) -> SDKResponse:
         """Get YooKassa payment status."""

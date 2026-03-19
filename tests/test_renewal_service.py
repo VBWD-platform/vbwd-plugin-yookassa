@@ -22,7 +22,7 @@ class TestYooKassaRenewalService:
         return inv
 
     def test_charge_saved_method_calls_payment_create(self, mocker):
-        from plugins.yookassa.src.services.yookassa_renewal_service import (
+        from plugins.yookassa.yookassa.services.yookassa_renewal_service import (
             YooKassaRenewalService,
         )
 
@@ -38,7 +38,7 @@ class TestYooKassaRenewalService:
         mock_yookassa.Payment.create.assert_called_once()
 
     def test_charge_saved_method_raises_if_no_payment_method(self):
-        from plugins.yookassa.src.services.yookassa_renewal_service import (
+        from plugins.yookassa.yookassa.services.yookassa_renewal_service import (
             YooKassaRenewalService,
         )
 
@@ -50,7 +50,7 @@ class TestYooKassaRenewalService:
             svc.charge_saved_method(sub, inv)
 
     def test_charge_saved_method_uses_idempotency_key(self, mocker):
-        from plugins.yookassa.src.services.yookassa_renewal_service import (
+        from plugins.yookassa.yookassa.services.yookassa_renewal_service import (
             YooKassaRenewalService,
         )
 
@@ -72,7 +72,7 @@ class TestYooKassaRenewalService:
         assert str(inv.id) == idempotency_key
 
     def test_charge_saved_method_uses_correct_amount(self, mocker):
-        from plugins.yookassa.src.services.yookassa_renewal_service import (
+        from plugins.yookassa.yookassa.services.yookassa_renewal_service import (
             YooKassaRenewalService,
         )
 
