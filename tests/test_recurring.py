@@ -94,27 +94,20 @@ class TestRecurringPaymentSavesMethod:
     """Test that payment.succeeded with saved method stores payment_method_id."""
 
     def test_saves_payment_method_on_subscription(
-        self, client, mock_container, yookassa_config
+        self, client, mock_container, yookassa_config, fake_lifecycle
     ):
-        """Should store payment_method_id on Subscription when method is saved."""
+        """A saved payment method is linked to the subscription via the port."""
         invoice_id = str(uuid4())
-        sub_id = uuid4()
 
         mock_invoice = MagicMock()
         mock_invoice.id = UUID(invoice_id)
         mock_invoice.status.value = "PENDING"
         mock_li = MagicMock()
         mock_li.item_type = LineItemType.SUBSCRIPTION
-        mock_li.item_id = sub_id
+        mock_li.item_id = uuid4()
         mock_invoice.line_items = [mock_li]
         mock_container.invoice_repository.return_value.find_by_id.return_value = (
             mock_invoice
-        )
-
-        mock_subscription = MagicMock()
-        mock_subscription.id = sub_id
-        mock_container.subscription_repository.return_value.find_by_id.return_value = (
-            mock_subscription
         )
 
         event_payload = {
@@ -131,9 +124,9 @@ class TestRecurringPaymentSavesMethod:
         )
         assert resp.status_code == 200
 
-        # Verify payment_method_id was stored
-        assert mock_subscription.provider_subscription_id == "pm_saved_123"
-        mock_container.subscription_repository.return_value.save.assert_called_once()
+        fake_lifecycle.link_provider_subscription.assert_called_once_with(
+            mock_invoice.id, "pm_saved_123"
+        )
 
     def test_no_save_when_method_not_saved(
         self, client, mock_container, yookassa_config

@@ -13,10 +13,8 @@ from vbwd.plugins.payment_route_helpers import (
     determine_session_mode,
 )
 from vbwd.sdk.interface import SDKConfig
-from vbwd.models.enums import LineItemType, InvoiceStatus
-from vbwd.events.payment_events import (
-    PaymentFailedEvent,
-)
+from vbwd.models.enums import InvoiceStatus
+from vbwd.services.subscription_lifecycle import resolve_subscription_lifecycle
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +23,7 @@ yookassa_plugin_bp = Blueprint("yookassa_plugin", __name__)
 
 def _get_adapter(config):
     """Instantiate YooKassaSDKAdapter from plugin config."""
-    from plugins.yookassa.sdk_adapter import YooKassaSDKAdapter
+    from plugins.yookassa.yookassa.sdk_adapter import YooKassaSDKAdapter
 
     prefix = "test_" if config.get("sandbox", True) else "live_"
     return YooKassaSDKAdapter(
@@ -122,7 +120,7 @@ def yookassa_webhook():
     )
 
     try:
-        from plugins.yookassa.sdk_adapter import YooKassaSDKAdapter
+        from plugins.yookassa.yookassa.sdk_adapter import YooKassaSDKAdapter
 
         event = YooKassaSDKAdapter.verify_webhook_signature_static(
             payload, signature, webhook_secret
@@ -251,26 +249,14 @@ def _handle_payment_canceled(obj):
         obj.get("id", ""),
     )
 
-    sub_repo = container.subscription_repository()
-    subscription_id = None
-    user_id = None
-    for li in invoice.line_items:
-        if li.item_type == LineItemType.SUBSCRIPTION:
-            sub = sub_repo.find_by_id(li.item_id)
-            if sub:
-                subscription_id = sub.id
-                user_id = sub.user_id
-            break
-
-    if subscription_id is not None:
-        event = PaymentFailedEvent(
-            subscription_id=subscription_id,
-            user_id=user_id,
-            error_code="payment_canceled",
-            error_message="YooKassa payment was canceled",
-            provider="yookassa",
-        )
-        container.event_dispatcher().emit(event)
+    # Flag the subscription on this invoice as payment-failed (via the
+    # subscription-lifecycle port — no subscription model import).
+    resolve_subscription_lifecycle().mark_invoice_payment_failed(
+        invoice_id=invoice.id,
+        provider="yookassa",
+        error_message="YooKassa payment was canceled",
+        error_code="payment_canceled",
+    )
 
 
 def _handle_refund_succeeded(obj):
@@ -290,17 +276,13 @@ def _handle_refund_succeeded(obj):
 
 
 def _save_payment_method_for_subscription(invoice, payment_method_id):
-    """Store payment_method_id on Subscription for recurring charges."""
-    container = current_app.container
-    sub_repo = container.subscription_repository()
+    """Store payment_method_id on the subscription for recurring charges.
 
-    for li in invoice.line_items:
-        if li.item_type == LineItemType.SUBSCRIPTION:
-            subscription = sub_repo.find_by_id(li.item_id)
-            if subscription:
-                subscription.provider_subscription_id = payment_method_id
-                sub_repo.save(subscription)
-                break
+    Delegated to the subscription-lifecycle port (no subscription model import).
+    """
+    resolve_subscription_lifecycle().link_provider_subscription(
+        invoice.id, payment_method_id
+    )
 
 
 def _reconcile_payment(invoice_id_str, payment_id, response_data):
