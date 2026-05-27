@@ -53,13 +53,12 @@ def create_session():
     mode = determine_session_mode(invoice)
     base_meta = {"invoice_id": str(invoice.id), "user_id": str(g.user_id)}
 
-    frontend_base = (
-        request.headers.get("Origin")
-        or request.headers.get("Referer", "").rstrip("/").rsplit("/pay", 1)[0]
-        or request.host_url.rstrip("/")
+    # S21 — shared helper.
+    from vbwd.plugins.payment_route_helpers import build_provider_redirect_urls
+
+    success_url, cancel_url = build_provider_redirect_urls(
+        request, "yookassa", success_query="?session_id={{session_id}}"
     )
-    success_url = f"{frontend_base}/pay/yookassa/success?session_id={{session_id}}"
-    cancel_url = f"{frontend_base}/pay/yookassa/cancel"
 
     if mode == "subscription":
         # YooKassa recurring: save payment method on initial payment
