@@ -94,9 +94,9 @@ class TestRecurringPaymentSavesMethod:
     """Test that payment.succeeded with saved method stores payment_method_id."""
 
     def test_saves_payment_method_on_subscription(
-        self, client, mock_container, yookassa_config, fake_lifecycle
+        self, client, mock_container, yookassa_config, published_events
     ):
-        """A saved payment method is linked to the subscription via the port."""
+        """A saved payment method publishes the provider-linked fact to the bus."""
         invoice_id = str(uuid4())
 
         mock_invoice = MagicMock()
@@ -124,9 +124,14 @@ class TestRecurringPaymentSavesMethod:
         )
         assert resp.status_code == 200
 
-        fake_lifecycle.link_provider_subscription.assert_called_once_with(
-            mock_invoice.id, "pm_saved_123"
-        )
+        linked = [d for n, d in published_events if n == "payment.provider_linked"]
+        assert linked == [
+            {
+                "invoice_id": str(mock_invoice.id),
+                "provider": "yookassa",
+                "provider_ref_id": "pm_saved_123",
+            }
+        ]
 
     def test_no_save_when_method_not_saved(
         self, client, mock_container, yookassa_config

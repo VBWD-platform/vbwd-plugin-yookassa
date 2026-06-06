@@ -11,10 +11,11 @@ from vbwd.plugins.payment_route_helpers import (
     validate_invoice_for_payment,
     emit_payment_captured,
     determine_session_mode,
+    publish_invoice_failed,
+    publish_provider_linked,
 )
 from vbwd.sdk.interface import SDKConfig
 from vbwd.models.enums import InvoiceStatus
-from vbwd.services.subscription_lifecycle import resolve_subscription_lifecycle
 
 logger = logging.getLogger(__name__)
 
@@ -248,9 +249,10 @@ def _handle_payment_canceled(obj):
         obj.get("id", ""),
     )
 
-    # Flag the subscription on this invoice as payment-failed (via the
-    # subscription-lifecycle port — no subscription model import).
-    resolve_subscription_lifecycle().mark_invoice_payment_failed(
+    # Flag payment failure keyed by invoice. YooKassa publishes the fact and
+    # the recurring-object plugin (if any) flags its object. No-op if no sub —
+    # yookassa stays subscription-free.
+    publish_invoice_failed(
         invoice_id=invoice.id,
         provider="yookassa",
         error_message="YooKassa payment was canceled",
@@ -275,12 +277,15 @@ def _handle_refund_succeeded(obj):
 
 
 def _save_payment_method_for_subscription(invoice, payment_method_id):
-    """Store payment_method_id on the subscription for recurring charges.
+    """Publish that YooKassa's payment method (recurring object) links to invoice.
 
-    Delegated to the subscription-lifecycle port (no subscription model import).
+    YooKassa stays subscription-free — it publishes the fact and the
+    recurring-object plugin (if any) records the id. No-op if no subscriber.
     """
-    resolve_subscription_lifecycle().link_provider_subscription(
-        invoice.id, payment_method_id
+    publish_provider_linked(
+        invoice_id=invoice.id,
+        provider="yookassa",
+        provider_ref_id=payment_method_id,
     )
 
 

@@ -297,9 +297,9 @@ class TestPaymentCanceled:
         )
 
     def test_payment_canceled_emits_payment_failed_event(
-        self, client, mock_container, yookassa_config, fake_lifecycle
+        self, client, mock_container, yookassa_config, published_events
     ):
-        """payment.canceled flags the invoice's subscription via the port."""
+        """payment.canceled publishes an invoice-failed fact to the bus."""
         invoice_id = str(uuid4())
         sub_id = uuid4()
         mock_invoice, _ = self._setup_invoice_with_subscription(
@@ -319,12 +319,15 @@ class TestPaymentCanceled:
         )
         assert resp.status_code == 200
 
-        fake_lifecycle.mark_invoice_payment_failed.assert_called_once_with(
-            invoice_id=mock_invoice.id,
-            provider="yookassa",
-            error_message="YooKassa payment was canceled",
-            error_code="payment_canceled",
-        )
+        failed = [d for n, d in published_events if n == "payment.invoice_failed"]
+        assert failed == [
+            {
+                "invoice_id": str(mock_invoice.id),
+                "provider": "yookassa",
+                "error_message": "YooKassa payment was canceled",
+                "error_code": "payment_canceled",
+            }
+        ]
 
     def test_payment_canceled_unknown_invoice_no_op(
         self, client, mock_container, yookassa_config

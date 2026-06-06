@@ -27,8 +27,11 @@ class YooKassaPlugin(PaymentProviderPlugin):
             version="1.0.0",
             author="VBWD Team",
             description="YooKassa payment provider — redirect checkout with webhooks",
-            # S07 — calls resolve_subscription_lifecycle in webhook handlers.
-            dependencies=["subscription"],
+            # S50.4 — recurring billing is event-driven: webhooks publish
+            # domain-neutral facts to the bus. No subscriber (subscription
+            # disabled) ⇒ the published fact is a no-op, so yookassa stays
+            # subscription-free and declares no subscription dependency.
+            dependencies=[],
         )
 
     def get_blueprint(self) -> Optional["Blueprint"]:

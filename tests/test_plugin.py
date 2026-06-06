@@ -44,10 +44,11 @@ class TestYooKassaPluginMetadata:
         """get_url_prefix should return '/api/v1/plugins/yookassa'."""
         assert plugin.get_url_prefix() == "/api/v1/plugins/yookassa"
 
-    def test_declares_subscription_dependency(self, plugin):
-        """S07 — YooKassa recurring billing calls resolve_subscription_lifecycle,
-        so the plugin MUST declare 'subscription' in dependencies."""
-        assert "subscription" in plugin.metadata.dependencies
+    def test_stays_subscription_free(self, plugin):
+        """S50.4 — recurring billing is event-driven: webhooks publish
+        domain-neutral facts to the bus and no-op when nothing subscribes, so
+        YooKassa declares NO subscription dependency and runs without it."""
+        assert "subscription" not in plugin.metadata.dependencies
 
     def test_on_enable_no_error(self, plugin):
         """on_enable should not raise any exception."""
