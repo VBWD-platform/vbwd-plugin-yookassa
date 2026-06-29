@@ -24,7 +24,7 @@ class YooKassaPlugin(PaymentProviderPlugin):
     def metadata(self) -> PluginMetadata:
         return PluginMetadata(
             name="yookassa",
-            version="26.6",
+            version="26.6.1",
             author="VBWD Team",
             description="YooKassa payment provider — redirect checkout with webhooks",
             # S50.4 — recurring billing is event-driven: webhooks publish
